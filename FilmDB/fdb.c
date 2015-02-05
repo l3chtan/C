@@ -13,7 +13,9 @@ struct meta_f{
 	char name[NAME_MAX];
 };
 
-void read_files(char *path, char *prev_d, char *file);
+int read_files(char *path, const char *prev_d, const char *file);
+int check_path(char **path);
+struct meta_f blub();
 
 
 int main(void){
@@ -47,17 +49,23 @@ int main(void){
 			return 1;
 		}
 
-		printf("Enter an absolut path\n");
-		scanf("%s", &paths[0][0]);
+		paths[0][0] = '\0';
+		do{
+			printf("Enter an absolut path:\n> ");
+			scanf("%s", &paths[0][0]);
+		} while(check_path(paths) != 0);
+		printf("Thank you\n");
 	}
 
 	//Remove the temporary file, which stores the film names
 	if(remove("Films.tmp") != 0){
-		fprintf(stderr, "Cannot remove file!");
+		fprintf(stderr, "Cannot remove file!\n");
 	}
 
 	for(i=0;i<a;i++){
-		read_files(paths[i], "", "");
+		if(read_files(paths[i], "", "") != 0){
+			return -1;
+		}
 	}
 
 	input = fopen("Films.tmp", "r");
@@ -72,7 +80,7 @@ int main(void){
 }
 
 
-void read_files(char *path, char *prev_d, char *file){
+int read_files(char *path, const char *prev_d, const char *file){
 
 	struct stat buff;
 	char new_p[NAME_MAX];
@@ -85,7 +93,7 @@ void read_files(char *path, char *prev_d, char *file){
 
 	if(stat(new_p, &buff) == -1){
 		fprintf(stderr, "Cannot access %s\n", path);
-		return;
+		return -1;
 	}
 
 	if((buff.st_mode & S_IFMT) == S_IFDIR){
@@ -96,7 +104,7 @@ void read_files(char *path, char *prev_d, char *file){
 
 		if((dp = opendir(new_p)) == NULL){
 			fprintf(stderr, "Cannot open directory %s\n", new_p);
-			return;
+			return -1;
 		}
 		while((rid = readdir(dp)) != NULL){
 			if('.'!= rid->d_name[0]){
@@ -125,9 +133,16 @@ void read_files(char *path, char *prev_d, char *file){
 		outp = fopen("Films.tmp", "a");
 		fprintf(outp,"%s\n", new_p);
 		printf("%s\n", new_p);
-		close(outp);
+		fclose(outp);
 	}
 
-	return;
+	return 0;
+}
 
+int check_path(char **path){
+
+	if(path[0][0] == '\0'){
+		return -1;
+	}
+	return 0;
 }
