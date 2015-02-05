@@ -55,7 +55,7 @@
 
 	if(a->size == INT_MAX-1){
 		fprintf(stderr, "You cannot add more elements to your arraylist\n");
-		return;
+		return -1;
 	}
 
 	if(a->size >= a->capacity){
@@ -63,6 +63,7 @@
 	}	
 	a->size = a->size+1;
 	a->list[a->size] = c;
+	return 0;
  }
 
 void al_remove(arraylist *a){
