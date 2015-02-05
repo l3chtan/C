@@ -51,10 +51,12 @@
  	a->list = n.list;
  }
 
+	{ "keys": ["shift+f11"], "command": "toggle_distraction_free" },
  void al_add(arraylist *a, void *c){
 
 	if(a->size == INT_MAX-1){
 		fprintf(stderr, "You cannot add more elements to your arraylist\n");
+	{ "keys": ["shift+f11"], "command": "toggle_distraction_free" },
 		return;
 	}
 
