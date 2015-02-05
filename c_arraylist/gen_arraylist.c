@@ -9,7 +9,8 @@
  arraylist al_init(){
  	arraylist a;
  	a.size = -1;
- 	a.list = list_alloc(1);
+ 	a.capacity = 10;
+ 	a.list = list_alloc(a.capacity);
  	return a;
  }
 
@@ -30,28 +31,24 @@
  	return v;
  }
 
- int al_size(arraylist *a){
-	return sizeof(a->list)/sizeof(void*);
- }
-
  void al_resize(arraylist *a, int new_size){
- 	arraylist n;	
+ 	arraylist n = al_init();	
  	int i=0;
 
  	n.size = a->size;
+ 	n.capacity = new_size;
  	n.list = list_alloc(new_size);
  	for(i=0;i<a->size;i++){
  		n.list[i]  = a->list[i];
  	}
- 	/*
- 	int num = sizeof(a->list);
- 	memcpy(n.list,a->list,num);
- 	*/
+
  	if(NULL == n.list){
  		exit(EXIT_FAILURE);
  	}
  	free(a->list);
- 	a = &n;
+ 	a->size = n.size;
+ 	a->capacity = n.capacity;
+ 	a->list = n.list;
  }
 
  void al_add(arraylist *a, void *c){
@@ -61,15 +58,16 @@
 		return;
 	}
 
-	if(a->size == al_size(a)){
-		al_resize(a,2*sizeof(a->size));
+	if(a->size >= a->capacity){
+		al_resize(a,2*a->capacity);
 	}	
-	a->list[a->size+1] = c;
+	a->size = a->size+1;
+	a->list[a->size] = c;
  }
 
 void al_remove(arraylist *a){
-	if(--(a->size) < al_size(a)/2){
-		al_resize(a,sizeof(a->list)/2);
+	if(--(a->size) < a->capacity/2){
+		al_resize(a,a->capacity/2);
 	}
 }
 
@@ -77,6 +75,6 @@ int al_get_size(arraylist *a){
 	return a->size;
 }
 
-void * al_get_elem(arraylist *a, int num){
+void * al_elem(arraylist *a, int num){
 	return a->list[num];
 }
