@@ -1,0 +1,1 @@
+compile with gcc fdb.c -lsqlite3 flag

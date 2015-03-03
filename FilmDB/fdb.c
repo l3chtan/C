@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <sqlite3.h>
 
 /* use strrchr(char *string, int c) to find last occurence of a character c in string string*/
 
@@ -13,7 +14,9 @@ struct meta_f{
 	char name[NAME_MAX];
 };
 
+int print_err(const char *s,int a);
 int read_files(char *path, const char *prev_d, const char *file);
+char ** get_path();
 int check_path(char **path);
 struct meta_f blub();
 
@@ -24,38 +27,19 @@ int main(void){
 	int i = 0, a = 1, cnt = 0;
 	char **paths, buf[NAME_MAX];
 
+	/*check for database, and create one if none exist*/
+	sqlite3 *db;
+	int rc = 0; 
 
-	input = fopen("path_to_files.dat", "r");
-		if((paths = (char**)malloc(a*sizeof(char*))) == NULL){
-			return 1;
-		}
+	rc = sqlite3_open("fdb.db", &db);
+	if(rc){
+		return print_err("Could not open database",2);
+	}	
 
-	if(input != NULL){
-		fscanf(input, "%d", &a);
+	sqlite3_close(db);
 
-		for(i=0;i<a;i++){
-			if((paths[i] = (char*)malloc(NAME_MAX)) == NULL){
-				return 1;
-			}
-			fscanf(input,"%s",&paths[i][0]);
-		}
 
-		fclose(input);
-	} else {
-		/*if((paths = (char**)malloc(sizeof(char*))) == NULL){
-			return 1;
-		}*/
-		if((paths[0] = (char*)malloc(NAME_MAX)) == NULL){
-			return 1;
-		}
-
-		paths[0][0] = '\0';
-		do{
-			printf("Enter an absolut path:\n> ");
-			scanf("%s", &paths[0][0]);
-		} while(check_path(paths) != 0);
-		printf("Thank you\n");
-	}
+	paths = get_path();
 
 	//Remove the temporary file, which stores the film names
 	if(remove("Films.tmp") != 0){
@@ -78,6 +62,7 @@ int main(void){
 
 	return 0;
 }
+
 
 
 int read_files(char *path, const char *prev_d, const char *file){
@@ -139,10 +124,60 @@ int read_files(char *path, const char *prev_d, const char *file){
 	return 0;
 }
 
+char ** get_path(){
+
+	int a = 1, i = 0;
+	FILE *input/*, *infout*/;
+	char **paths;
+
+
+	input = fopen("path_to_files.dat", "r");
+		if((paths = (char**)malloc(a*sizeof(char*))) == NULL){
+			print_err("Could not allocate memory",1);
+			return NULL;
+		}
+
+	if(input != NULL){
+		fscanf(input, "%d", &a);
+
+		for(i=0;i<a;i++){
+			if((paths[i] = (char*)malloc(NAME_MAX)) == NULL){
+				print_err("Could not allocate memory",1);
+				return NULL;
+			}
+			fscanf(input,"%s",&paths[i][0]);
+		}
+
+		fclose(input);
+	} else {
+		/*if((paths = (char**)malloc(sizeof(char*))) == NULL){
+			return 1;
+		}*/
+		if((paths[0] = (char*)malloc(NAME_MAX)) == NULL){
+			print_err("Could not allocate memory",1);
+			return NULL;
+		}
+
+		paths[0][0] = '\0';
+		do{
+			printf("Enter an absolut path:\n> ");
+			scanf("%s", &paths[0][0]);
+		} while(check_path(paths) != 0);
+		printf("Thank you\n");
+	}
+
+	return paths;
+}
+
 int check_path(char **path){
 
 	if(path[0][0] == '\0'){
 		return -1;
 	}
 	return 0;
+}
+
+int print_err(const char* s, int a){
+	fprintf(stderr, "%s\n",s);
+	return a;
 }
