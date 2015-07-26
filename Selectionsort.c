@@ -17,22 +17,17 @@ int main(int argc, char *argv[]){
 	for(i=0;i<len_A;i++){
 		A[i] = 0;
 	}
-	buf = (char *)malloc(200*sizeof(char));
+	buf = (char *)malloc(20*sizeof(char));
 
 	printf("Enter the row of numbers you want sorted.\nAll extra digits will be omitted.\n");
 
-	fgets(buf,200,stdin);
-
-	for(i=0;i<len_A;i++){
-		if(buf[i] >= '0' && buf[i] <= '9'){
-		A[i] = buf[i] - '0';
-		//printf("%d\n",A[i]);
-		} else {
-			fprintf(stderr, "Character '%c' is no digit\n",buf[i]);
-			return 2;
-		}
+	for(i=0;i<atoi(argv[1]);i++){
+		buf[0] = '\0';		
+		fgets(buf,20,stdin);
+		/*TODO: Implement check for non-numbers*/
+		A[i] = atoi(buf);
 	}
-	
+
 	printf("Thank you!\n");
 
 	for(i=1;i<len_A;i++){
